@@ -50,6 +50,24 @@ function App() {
         <table>
           <thead>
             <tr>
+              <th>
+                <input type="text" name="name" placeholder="Filter by name" />
+              </th>
+              <th>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Filter by username"
+                />
+              </th>
+              <th>
+                <input type="text" name="email" placeholder="Filter by email" />
+              </th>
+              <th>
+                <input type="text" name="phone" placeholder="Filter by phone" />
+              </th>
+            </tr>
+            <tr>
               <th>Name</th>
               <th>Username</th>
               <th>Email</th>
