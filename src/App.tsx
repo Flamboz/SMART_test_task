@@ -25,7 +25,14 @@ type User = {
 };
 
 function App() {
-  const [users, setUsers] = useState<User[] | null>(null);
+  const [users, setUsers] = useState<User[] | [] | null>(null);
+  const [filteredUsers, setFilteredUsers] = useState(users);
+  const [filterValues, setFilterValues] = useState({
+    name: "",
+    username: "",
+    email: "",
+    phone: "",
+  });
 
   const getUsers = async () => {
     try {
@@ -34,6 +41,7 @@ function App() {
       );
       const data: User[] = await response.json();
       setUsers(data);
+      setFilteredUsers(data);
     } catch (error) {
       console.error("Failed to fetch users:", error);
     }
@@ -43,6 +51,28 @@ function App() {
     getUsers();
   }, []);
 
+  const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setFilterValues((prev) => ({
+      ...prev,
+      [name]: value.toLowerCase(),
+    }));
+  };
+
+  useEffect(() => {
+    if (users) {
+      const filteredUsersArr = users.filter(
+        (user) =>
+          user.name.toLowerCase().includes(filterValues.name) &&
+          user.username.toLowerCase().includes(filterValues.username) &&
+          user.email.toLowerCase().includes(filterValues.email) &&
+          user.phone.toLowerCase().includes(filterValues.phone)
+      );
+      setFilteredUsers(filteredUsersArr);
+    }
+  }, [filterValues, users]);
+
   return (
     <div>
       <h1>User List</h1>
@@ -51,20 +81,40 @@ function App() {
           <thead>
             <tr>
               <th>
-                <input type="text" name="name" placeholder="Filter by name" />
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Filter by name"
+                  value={filterValues.name}
+                  onChange={handleFilter}
+                />
               </th>
               <th>
                 <input
                   type="text"
                   name="username"
                   placeholder="Filter by username"
+                  value={filterValues.username}
+                  onChange={handleFilter}
                 />
               </th>
               <th>
-                <input type="text" name="email" placeholder="Filter by email" />
+                <input
+                  type="text"
+                  name="email"
+                  placeholder="Filter by email"
+                  value={filterValues.email}
+                  onChange={handleFilter}
+                />
               </th>
               <th>
-                <input type="text" name="phone" placeholder="Filter by phone" />
+                <input
+                  type="text"
+                  name="phone"
+                  placeholder="Filter by phone"
+                  value={filterValues.phone}
+                  onChange={handleFilter}
+                />
               </th>
             </tr>
             <tr>
@@ -75,7 +125,7 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {filteredUsers?.map((user) => (
               <tr key={user.id}>
                 <td>{user.name}</td>
                 <td>{user.username}</td>
