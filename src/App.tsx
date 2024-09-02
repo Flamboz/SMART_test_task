@@ -56,6 +56,24 @@ function App() {
     }
   }, [filterValues, users, dispatch]);
 
+  const highlightText = (text: string, highlight: string) => {
+    const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+
+    return (
+      <span>
+        {parts.map((part, index) =>
+          part.toLowerCase() === highlight.toLowerCase() ? (
+            <span key={index} style={{ backgroundColor: "yellow" }}>
+              {part}
+            </span>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    );
+  };
+
   return (
     <div>
       <h1>User List</h1>
@@ -110,10 +128,10 @@ function App() {
           <tbody>
             {filteredUsers?.map((user) => (
               <tr key={user.id}>
-                <td>{user.name}</td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>{user.phone}</td>
+                <td>{highlightText(user.name, filterValues.name)}</td>
+                <td>{highlightText(user.username, filterValues.username)}</td>
+                <td>{highlightText(user.email, filterValues.email)}</td>
+                <td>{highlightText(user.phone, filterValues.phone)}</td>
               </tr>
             ))}
           </tbody>
