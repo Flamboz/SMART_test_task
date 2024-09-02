@@ -1,22 +1,14 @@
-import { useEffect, useState } from "react";
-
-type User = {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-  phone: string;
-};
+import { useEffect } from "react";
+import { User } from "./types";
+import { useDispatch, useSelector } from "react-redux";
+import { setUsers, setFilteredUsers } from "./slices/userSlice";
+import { setFilterValues } from "./slices/filterSlice";
 
 function App() {
-  const [users, setUsers] = useState<User[] | [] | null>(null);
-  const [filteredUsers, setFilteredUsers] = useState(users);
-  const [filterValues, setFilterValues] = useState({
-    name: "",
-    username: "",
-    email: "",
-    phone: "",
-  });
+  const dispatch = useDispatch();
+  const users = useSelector((state) => state.user.users);
+  const filteredUsers = useSelector((state) => state.user.filteredUsers);
+  const filterValues = useSelector((state) => state.filter);
 
   const getUsers = async () => {
     try {
@@ -24,8 +16,7 @@ function App() {
         "https://jsonplaceholder.typicode.com/users"
       );
       const data: User[] = await response.json();
-      setUsers(data);
-      setFilteredUsers(data);
+      dispatch(setUsers(data));
     } catch (error) {
       console.error("Failed to fetch users:", error);
     }
@@ -34,14 +25,10 @@ function App() {
   useEffect(() => {
     getUsers();
   }, []);
-
   const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    setFilterValues((prev) => ({
-      ...prev,
-      [name]: value.toLowerCase(),
-    }));
+    dispatch(setFilterValues({ ...filterValues, [name]: value.toLowerCase() }));
   };
 
   useEffect(() => {
@@ -53,9 +40,9 @@ function App() {
           user.email.toLowerCase().includes(filterValues.email) &&
           user.phone.toLowerCase().includes(filterValues.phone)
       );
-      setFilteredUsers(filteredUsersArr);
+      dispatch(setFilteredUsers(filteredUsersArr));
     }
-  }, [filterValues, users]);
+  }, [filterValues, users, dispatch]);
 
   return (
     <div>
