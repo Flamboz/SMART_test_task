@@ -43,7 +43,35 @@ function App() {
     getUsers();
   }, []);
 
-  return <div>hello</div>;
+  return (
+    <div>
+      <h1>User List</h1>
+      {users ? (
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Phone</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id}>
+                <td>{user.name}</td>
+                <td>{user.username}</td>
+                <td>{user.email}</td>
+                <td>{user.phone}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>Loading users...</p>
+      )}
+    </div>
+  );
 }
 
 export default App;
