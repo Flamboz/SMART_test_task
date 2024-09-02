@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUsers, setFilteredUsers } from "./slices/userSlice";
 import { setFilterValues } from "./slices/filterSlice";
 import { RootState, AppDispatch } from "./store";
+import { Container, Heading, Highlight, Input, Loader, LoadingWrapper, NoUsersFound, Table, TableWrapper, Td, Th } from "./App.styled";
 
 export type User = {
   id: number;
@@ -22,7 +23,10 @@ function App() {
     (state: RootState) => state.filter.filterValues
   );
 
+  const [loading, setLoading] = useState(true);
+
   const getUsers = async () => {
+    setLoading(true);
     try {
       const response = await fetch(
         "https://jsonplaceholder.typicode.com/users"
@@ -31,6 +35,8 @@ function App() {
       dispatch(setUsers(data));
     } catch (error) {
       console.error("Failed to fetch users:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,9 +69,7 @@ function App() {
       <span>
         {parts.map((part, index) =>
           part.toLowerCase() === highlight.toLowerCase() ? (
-            <span key={index} style={{ backgroundColor: "yellow" }}>
-              {part}
-            </span>
+            <Highlight key={index}>{part}</Highlight>
           ) : (
             part
           )
@@ -75,71 +79,83 @@ function App() {
   };
 
   return (
-    <div>
-      <h1>User List</h1>
-      {users ? (
-        <table>
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Filter by name"
-                  value={filterValues.name}
-                  onChange={handleFilter}
-                />
-              </th>
-              <th>
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="Filter by username"
-                  value={filterValues.username}
-                  onChange={handleFilter}
-                />
-              </th>
-              <th>
-                <input
-                  type="text"
-                  name="email"
-                  placeholder="Filter by email"
-                  value={filterValues.email}
-                  onChange={handleFilter}
-                />
-              </th>
-              <th>
-                <input
-                  type="text"
-                  name="phone"
-                  placeholder="Filter by phone"
-                  value={filterValues.phone}
-                  onChange={handleFilter}
-                />
-              </th>
-            </tr>
-            <tr>
-              <th>Name</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Phone</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers?.map((user) => (
-              <tr key={user.id}>
-                <td>{highlightText(user.name, filterValues.name)}</td>
-                <td>{highlightText(user.username, filterValues.username)}</td>
-                <td>{highlightText(user.email, filterValues.email)}</td>
-                <td>{highlightText(user.phone, filterValues.phone)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <Container>
+      <Heading>User List</Heading>
+      {loading ? (
+        <LoadingWrapper>
+          <Loader />
+        </LoadingWrapper>
       ) : (
-        <p>Loading users...</p>
+        <TableWrapper>
+          <Table>
+            <thead>
+              <tr>
+                <Th>
+                  <Input
+                    type="text"
+                    name="name"
+                    placeholder="Filter by name"
+                    value={filterValues.name}
+                    onChange={handleFilter}
+                  />
+                </Th>
+                <Th>
+                  <Input
+                    type="text"
+                    name="username"
+                    placeholder="Filter by username"
+                    value={filterValues.username}
+                    onChange={handleFilter}
+                  />
+                </Th>
+                <Th>
+                  <Input
+                    type="text"
+                    name="email"
+                    placeholder="Filter by email"
+                    value={filterValues.email}
+                    onChange={handleFilter}
+                  />
+                </Th>
+                <Th>
+                  <Input
+                    type="text"
+                    name="phone"
+                    placeholder="Filter by phone"
+                    value={filterValues.phone}
+                    onChange={handleFilter}
+                  />
+                </Th>
+              </tr>
+              <tr>
+                <Th>Name</Th>
+                <Th>Username</Th>
+                <Th>Email</Th>
+                <Th>Phone</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers?.length === 0 ? (
+                <tr>
+                  <NoUsersFound colSpan={4}>No users found</NoUsersFound>
+                </tr>
+              ) : (
+                filteredUsers?.map((user) => (
+                  <tr key={user.id}>
+                    <Td>{highlightText(user.name, filterValues.name)}</Td>
+                    <Td>
+                      {highlightText(user.username, filterValues.username)}
+                    </Td>
+                    <Td>{highlightText(user.email, filterValues.email)}</Td>
+                    <Td>{highlightText(user.phone, filterValues.phone)}</Td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </Table>
+        </TableWrapper>
       )}
-    </div>
+    </Container>
   );
 }
 
