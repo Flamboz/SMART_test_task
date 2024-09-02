@@ -1,14 +1,26 @@
 import { useEffect } from "react";
-import { User } from "./types";
 import { useDispatch, useSelector } from "react-redux";
 import { setUsers, setFilteredUsers } from "./slices/userSlice";
 import { setFilterValues } from "./slices/filterSlice";
+import { RootState, AppDispatch } from "./store";
+
+export type User = {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  phone: string;
+};
 
 function App() {
-  const dispatch = useDispatch();
-  const users = useSelector((state) => state.user.users);
-  const filteredUsers = useSelector((state) => state.user.filteredUsers);
-  const filterValues = useSelector((state) => state.filter);
+  const dispatch = useDispatch<AppDispatch>();
+  const users = useSelector((state: RootState) => state.user.users);
+  const filteredUsers = useSelector(
+    (state: RootState) => state.user.filteredUsers
+  );
+  const filterValues = useSelector(
+    (state: RootState) => state.filter.filterValues
+  );
 
   const getUsers = async () => {
     try {
@@ -25,9 +37,9 @@ function App() {
   useEffect(() => {
     getUsers();
   }, []);
+
   const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
     dispatch(setFilterValues({ ...filterValues, [name]: value.toLowerCase() }));
   };
 
