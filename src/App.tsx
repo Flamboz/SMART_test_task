@@ -15,6 +15,7 @@ import {
   TableWrapper,
   Td,
   Th,
+  ErrorMessage,
 } from "./App.styled";
 import { User } from "./types";
 
@@ -23,16 +24,21 @@ const useLoadUsers = () => {
 
   const users = useSelector((state: RootState) => state.user.users);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const getUsers = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const response = await fetch(
         "https://jsonplaceholder.typicode.com/users"
       );
+      if (!response.ok) throw new Error("Network response was not ok");
       const data: User[] = await response.json();
+
       dispatch(setUsers(data));
     } catch (error) {
+      setError("Failed to fetch users. Please try again later.");
       console.error("Failed to fetch users:", error);
     } finally {
       setIsLoading(false);
@@ -43,7 +49,7 @@ const useLoadUsers = () => {
     getUsers();
   }, []);
 
-  return { users, isLoading };
+  return { users, isLoading, error };
 };
 
 const useFilterUsers = (users: User[]) => {
@@ -94,13 +100,15 @@ const highlightText = (text: string, highlight: string) => {
 };
 
 function App() {
-  const { users, isLoading } = useLoadUsers();
+  const { users, isLoading, error } = useLoadUsers();
   const { filteredUsers, filterValues, handleFilter } = useFilterUsers(users);
 
   return (
     <Container>
       <Heading>User List</Heading>
-      {isLoading ? (
+      {error ? (
+        <ErrorMessage>{error}</ErrorMessage>
+      ) : isLoading ? (
         <LoadingWrapper>
           <Loader />
         </LoadingWrapper>

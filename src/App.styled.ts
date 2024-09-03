@@ -107,3 +107,15 @@ export const Loader = styled.div`
     }
   }
 `;
+
+export const ErrorMessage = styled.div`
+  font-size: 16px;
+  font-weight: bold;
+  color: #d8000c;
+  text-align: center;
+  background-color: #fdd;
+  border: 1px solid #d8000c;
+  border-radius: 4px;
+  padding: 16px;
+  margin: 16px 0;
+`;
