@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUsers, setFilteredUsers } from "./slices/userSlice";
 import { setFilterValues } from "./slices/filterSlice";
@@ -26,14 +26,19 @@ const useLoadUsers = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getUsers = async () => {
+  const getUsers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+
     try {
       const response = await fetch(
         "https://jsonplaceholder.typicode.com/users"
       );
-      if (!response.ok) throw new Error("Network response was not ok");
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
       const data: User[] = await response.json();
 
       dispatch(setUsers(data));
@@ -43,11 +48,11 @@ const useLoadUsers = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     getUsers();
-  }, []);
+  }, [getUsers]);
 
   return { users, isLoading, error };
 };
@@ -83,7 +88,14 @@ const useFilterUsers = (users: User[]) => {
   return { filteredUsers, filterValues, handleFilter };
 };
 
-const highlightText = (text: string, highlight: string) => {
+interface HighlightTextProps {
+  text: string;
+  highlight: string;
+}
+
+const HighlightText: React.FC<HighlightTextProps> = ({ text, highlight }) => {
+  if (!highlight.trim()) return <span>{text}</span>;
+
   const parts = text.split(new RegExp(`(${highlight})`, "gi"));
 
   return (
@@ -106,9 +118,8 @@ function App() {
   return (
     <Container>
       <Heading>User List</Heading>
-      {error ? (
-        <ErrorMessage>{error}</ErrorMessage>
-      ) : isLoading ? (
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+      {isLoading ? (
         <LoadingWrapper>
           <Loader />
         </LoadingWrapper>
@@ -169,12 +180,30 @@ function App() {
               ) : (
                 filteredUsers?.map((user) => (
                   <tr key={user.id}>
-                    <Td>{highlightText(user.name, filterValues.name)}</Td>
                     <Td>
-                      {highlightText(user.username, filterValues.username)}
+                      <HighlightText
+                        text={user.name}
+                        highlight={filterValues.name}
+                      />
                     </Td>
-                    <Td>{highlightText(user.email, filterValues.email)}</Td>
-                    <Td>{highlightText(user.phone, filterValues.phone)}</Td>
+                    <Td>
+                      <HighlightText
+                        text={user.username}
+                        highlight={filterValues.username}
+                      />
+                    </Td>
+                    <Td>
+                      <HighlightText
+                        text={user.email}
+                        highlight={filterValues.email}
+                      />
+                    </Td>
+                    <Td>
+                      <HighlightText
+                        text={user.phone}
+                        highlight={filterValues.phone}
+                      />
+                    </Td>
                   </tr>
                 ))
               )}
