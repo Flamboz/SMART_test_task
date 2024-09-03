@@ -5,6 +5,10 @@ export const Container = styled.div`
   color: #333;
   background: #f5f5f5;
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 export const Heading = styled.h1`
@@ -30,6 +34,7 @@ export const Table = styled.table`
 `;
 
 export const Th = styled.th`
+  min-width: 15rem;
   position: sticky;
   top: 0;
   z-index: 1;
