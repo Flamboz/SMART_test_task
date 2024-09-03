@@ -3,30 +3,29 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUsers, setFilteredUsers } from "./slices/userSlice";
 import { setFilterValues } from "./slices/filterSlice";
 import { RootState, AppDispatch } from "./store";
-import { Container, Heading, Highlight, Input, Loader, LoadingWrapper, NoUsersFound, Table, TableWrapper, Td, Th } from "./App.styled";
+import {
+  Container,
+  Heading,
+  Highlight,
+  Input,
+  Loader,
+  LoadingWrapper,
+  NoUsersFound,
+  Table,
+  TableWrapper,
+  Td,
+  Th,
+} from "./App.styled";
+import { User } from "./types";
 
-export type User = {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-  phone: string;
-};
-
-function App() {
+const useLoadUsers = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const users = useSelector((state: RootState) => state.user.users);
-  const filteredUsers = useSelector(
-    (state: RootState) => state.user.filteredUsers
-  );
-  const filterValues = useSelector(
-    (state: RootState) => state.filter.filterValues
-  );
 
-  const [loading, setLoading] = useState(true);
+  const users = useSelector((state: RootState) => state.user.users);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getUsers = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const response = await fetch(
         "https://jsonplaceholder.typicode.com/users"
@@ -36,13 +35,26 @@ function App() {
     } catch (error) {
       console.error("Failed to fetch users:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     getUsers();
   }, []);
+
+  return { users, isLoading };
+};
+
+const useFilterUsers = (users: User[]) => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const filteredUsers = useSelector(
+    (state: RootState) => state.user.filteredUsers
+  );
+  const filterValues = useSelector(
+    (state: RootState) => state.filter.filterValues
+  );
 
   const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -62,26 +74,33 @@ function App() {
     }
   }, [filterValues, users, dispatch]);
 
-  const highlightText = (text: string, highlight: string) => {
-    const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+  return { filteredUsers, filterValues, handleFilter };
+};
 
-    return (
-      <span>
-        {parts.map((part, index) =>
-          part.toLowerCase() === highlight.toLowerCase() ? (
-            <Highlight key={index}>{part}</Highlight>
-          ) : (
-            part
-          )
-        )}
-      </span>
-    );
-  };
+const highlightText = (text: string, highlight: string) => {
+  const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+
+  return (
+    <span>
+      {parts.map((part, index) =>
+        part.toLowerCase() === highlight.toLowerCase() ? (
+          <Highlight key={index}>{part}</Highlight>
+        ) : (
+          part
+        )
+      )}
+    </span>
+  );
+};
+
+function App() {
+  const { users, isLoading } = useLoadUsers();
+  const { filteredUsers, filterValues, handleFilter } = useFilterUsers(users);
 
   return (
     <Container>
       <Heading>User List</Heading>
-      {loading ? (
+      {isLoading ? (
         <LoadingWrapper>
           <Loader />
         </LoadingWrapper>
